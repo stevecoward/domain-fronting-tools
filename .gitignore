@@ -5,3 +5,4 @@ MANIFEST
 site.retry
 env/
 dist/
+config.ini
