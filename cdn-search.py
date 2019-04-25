@@ -5,18 +5,34 @@ import requests
 import multiprocessing
 import copy
 import argparse
+import configparser
 from contextlib import closing
+import sys
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+""" Open config options to load Censys API credentials """
+config = configparser.ConfigParser()
+try:
+    config.read('config.ini')
+    if 'censys.api' not in config:
+        raise Exception()
+except Exception as ex:
+    print('config.ini not found. Please create it using the following template:')
+    print("""[censys.api]
+auth_uid = <censys_api_uid>
+auth_secret = <censys_api_secret>
+""")
+    sys.exit(-1)
 
 """ Censys URL and API settings """
 base_url = 'https://censys.io/api/v1'
-auth_uid = 'e8c59fea-3545-4700-b335-a46aad4d4ab7'
-auth_secret = 'nmqCn5Vu2OmU9ikFJyahSDKsksQNMdr2'
+auth_uid = config['censys.api']['auth_uid']
+auth_secret = config['censys.api']['auth_secret']
 
 """ Proxies for requests. Useful for debugging, but you can make an empty dict to ignore """
 proxies = {
-    'http': 'http://127.0.0.1:8080',
-    'https': 'http://127.0.0.1:8080',
+    # 'http': 'http://127.0.0.1:8080',
+    # 'https': 'http://127.0.0.1:8080',
 }
 
 def make_request(endpoint, query):
@@ -89,9 +105,9 @@ def main(domain, pages):
     pool.close()
 
     """Flatten the results returned from map(), otherwise `results_list`
-    will be a list of lists.
+    will be a list of lists. Also de-dupe records.
     """
-    results_list = [record for sublist in map_results for record in sublist]
+    results_list = list(dict.fromkeys([record for sublist in map_results for record in sublist]))
     for subdomain in results_list:
         print(subdomain)
     print(f'\nretrieved: {len(results_list)} possible frontable domains')

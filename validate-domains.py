@@ -8,8 +8,8 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 """ Proxies for requests. Useful for debugging, but you can make an empty dict to ignore """
 proxies = {
-    'http': 'http://127.0.0.1:8080',
-    'https': 'http://127.0.0.1:8080',
+    # 'http': 'http://127.0.0.1:8080',
+    # 'https': 'http://127.0.0.1:8080',
 }
 
 def test_domain(options):
